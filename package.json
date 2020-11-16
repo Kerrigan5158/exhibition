@@ -1,0 +1,36 @@
+{
+  "name": "exhibition",
+  "version": "1.0.0",
+  "description": "3D展览",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "build": "webpack",
+    "start": "webpack-dev-server --open"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kerrigan5158/exhibition.git"
+  },
+  "keywords": [
+    "exhi"
+  ],
+  "author": "kerrigan5158",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Kerrigan5158/exhibition/issues"
+  },
+  "homepage": "https://github.com/Kerrigan5158/exhibition#readme",
+  "devDependencies": {
+    "file-loader": "^6.2.0",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {
+    "clean-webpack-plugin": "^3.0.0",
+    "html-webpack-plugin": "^4.5.0",
+    "three": "^0.122.0",
+    "three-js-csg": "^72.0.0"
+  }
+}
