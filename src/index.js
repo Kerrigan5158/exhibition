@@ -9,6 +9,7 @@ import top from './assets/top.jpg';
 import head from './assets/head.jpg';
 import floor from './assets/floor.jpg';
 import even from './assets/event.png';
+import { Vector3 } from './helper/three.module';
 
 
 var scene,camera,webGLRenderer,controls,clock,e1,e2,mouse,raycaster,rootDom,rect;
@@ -28,7 +29,6 @@ function initCamera(){
 
     let position = new THREE.Vector3(-1, 10, 0);
     camera.lookAt(position);
-    console.log(camera);
     camera.updateMatrixWorld();
     scene.add(camera);
 }
@@ -69,8 +69,8 @@ function initObjects(){
 
     paintWalls(102, 2, wallHeight, 100, 10, 0, 1/2, 0, 1/2,true);//右面墙
 
-    images[0] = paintImg(10,0.2,10,1, 10, 30,1/2, 0,-1/2,true,0,{x: 20,y: 10,z:-30});//画
-    images[1] = paintImg(10,0.2,10,1, 10, -30,1/2, 0,-1/2,true,1,{x: 20,y: 10,z:30});//画
+    images[0] = paintImg(10,0.2,10,1, 10, 30,1/2, 0,-1/2,true,0,{x: 20,y: 10,z:30});//画
+    images[1] = paintImg(10,0.2,10,1, 10, -30,1/2, 0,-1/2,true,1,{x: 20,y: 10,z:-30});//画
 
     images[2] = paintImg(10,0.2,10,-50, 10, 49,0.5, 1, 0,true,2, {x: -50,y: 10,z:30});//画
     images[3] = paintImg(10,0.2,10,50, 10, 49,0.5, 1, 0,true,3, {x: 50,y: 10,z:30});//画
@@ -81,8 +81,9 @@ function initObjects(){
     images[6] = paintImg(10,0.2,10,-50, 10, -49,-1/2, 0,null,true,6,{x: -50,y: 10,z:-30});//画
     images[7] = paintImg(10,0.2,10,50, 10, -49,-1/2, 0,null,true,7,{x: -50,y: 10,z:-30});//画
 
-    e1 = paintEvent(5,5,5,50,-2.5,0,0,0,0,true);
-    e2 = paintEvent(5,5,5,-50,-2.5,0,0,0,0,true);
+
+    images[8] = paintEvent(5,5,5,50,-2.5,0,0,0,0,true,0,{x:50,y:10,z:0},{x:99,y:10,z:0});
+    images[9] = paintEvent(5,5,5,-50,-2.5,0,0,0,0,true,1,{x:-50,y:10,z:0},{x:-99,y:10,z:0});
 
 }
 
@@ -153,7 +154,7 @@ var paintTop = function (){
     });
 }
 
-var paintEvent = function(width, depth, height, x, y, z, rotationX, rotationY, rotationZ,addmesh){
+var paintEvent = function(width, depth, height, x, y, z, rotationX, rotationY, rotationZ,addmesh,id,lookPosition,targetPosition){
     var texture = new THREE.TextureLoader().load(even);
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     var material = new THREE.MeshLambertMaterial({
@@ -172,7 +173,9 @@ var paintEvent = function(width, depth, height, x, y, z, rotationX, rotationY, r
     if(rotationZ){
         mesh.rotation.z = Math.PI * rotationZ;
     }
-    mesh.name = 'event';
+    mesh.name = 'event'+id;
+    mesh.lookPosition = lookPosition;
+    mesh.targetPosition = targetPosition;
     addmesh && scene.add(mesh);
     return mesh;
 }
@@ -254,7 +257,7 @@ var paintGlass = function (width, depth, height, x, y, z, rotationX, rotationY, 
     return mesh;
 }
 
-var lookPosition = {},dis={},obejctPosition;
+var lookPosition = {},dis={},obejctPosition, dis_look={},nowTargetPosition,jia=100;
 function render() {
     requestAnimationFrame(render);
     // y += 0.01;
@@ -262,25 +265,57 @@ function render() {
     // camera.lookAt(position);
     controls.update(clock.getDelta());
     //raycaster.setFromCamera( mouse, camera );
-    if (lookPosition && dis && (Math.abs(camera.position.x - lookPosition.x) > 1 || 
-    Math.abs(camera.position.y - lookPosition.y) > 1 || 
-    Math.abs(camera.position.z - lookPosition.z) > 1)) {
+    // if (lookPosition && dis && (Math.abs(camera.position.x - lookPosition.x) > Math.abs(dis.x) || 
+    // Math.abs(camera.position.y - lookPosition.y) > Math.abs(dis.y) || 
+    // Math.abs(camera.position.z - lookPosition.z) > Math.abs(dis.z))) {
+    //     camera.position.x += dis.x;
+    //     camera.position.y += dis.y;
+    //     camera.position.z += dis.z;
+       
+    //     // camera.updateMatrixWorld();
+    // } else {
+    //     lookPosition = null;
+    //     dis.x = 0;
+    //     dis.y = 0;
+    //     dis.z = 0;
+       
+    //     // if (obejctPosition) {
+    //     //     // let posi = new THREE.Vector3(obejctPosition.x,obejctPosition.y,obejctPosition.z);
+    //     //     // camera.lookAt(posi);
+    //     //     obejctPosition = null;
+    //     //     // nowTargetPosition = null;
+        // }
+        
+    // }
+
+    // if (nowTargetPosition && dis_look && (
+    //     Math.abs(nowTargetPosition.x - obejctPosition.x) > Math.abs(dis_look.x) || 
+    //     Math.abs(nowTargetPosition.y - obejctPosition.y) > Math.abs(dis_look.y) || 
+    //     Math.abs(nowTargetPosition.z - obejctPosition.z) > Math.abs(dis_look.z)
+    // )) {
+    //     jia++;
+    //     nowTargetPosition.x += dis_look.x;
+    //     nowTargetPosition.y += dis_look.y;
+    //     nowTargetPosition.z += dis_look.z;
+    //     console.log(dis_look);
+    //     controls.lookAt(nowTargetPosition);
+    // } else {
+    //     dis_look.x = 0;
+    //     dis_look.y = 0;
+    //     dis_look.z = 0;
+    //     nowTargetPosition = null;
+    // }
+    if (jia < 100) {
+        jia++;
         camera.position.x += dis.x;
         camera.position.y += dis.y;
         camera.position.z += dis.z;
-        let posi = new THREE.Vector3(obejctPosition.x,obejctPosition.y,obejctPosition.z);
-        camera.lookAt(posi);
-        // camera.updateMatrixWorld();
+        nowTargetPosition.x += dis_look.x;
+        nowTargetPosition.y += dis_look.y;
+        nowTargetPosition.z += dis_look.z;
+        controls.lookAt(nowTargetPosition);
+
     } else {
-        lookPosition = null;
-        dis.x = 0;
-        dis.y = 0;
-        dis.z = 0;
-        if (obejctPosition) {
-            let posi = new THREE.Vector3(obejctPosition.x,obejctPosition.y,obejctPosition.z);
-            camera.lookAt(posi);
-            obejctPosition = null;
-        }
         
     }
     
@@ -299,7 +334,7 @@ function addEvent(){
     
         mouse.x = (event.clientX / rect.width) * 2 - 1;
         mouse.y = -(event.clientY/rect.height) *2 + 1;
-        console.log(mouse);
+
         // 通过鼠标点的位置和当前相机的矩阵计算出raycaster
         raycaster.setFromCamera( mouse, camera );
     
@@ -314,7 +349,15 @@ function addEvent(){
             dis.y = (intersects[0].object.lookPosition.y - camera.position.y) / 100;
             dis.z = (intersects[0].object.lookPosition.z - camera.position.z) / 100;
             lookPosition = intersects[0].object.lookPosition;
-            obejctPosition = intersects[0].object.position;
+            obejctPosition = intersects[0].object.targetPosition || intersects[0].object.position;
+            nowTargetPosition = controls.nowTargetPosition;
+            dis_look.x = (obejctPosition.x-nowTargetPosition.x) / 100;
+            dis_look.y = (obejctPosition.y-nowTargetPosition.y) / 100;
+            dis_look.z = (obejctPosition.z-nowTargetPosition.z) / 100;
+            jia = 0;
+            // console.log(nowTargetPosition);
+            // console.log(obejctPosition);
+            // console.log(dis_look);
             // camera.translateZ( - ( intersects[0].object.lookPosition.z- camera.position.z));
             // let posi = new THREE.Vector3(intersects[0].object.position.x,intersects[0].object.position.y,intersects[0].object.position.z);
             // camera.lookAt(posi);

@@ -56,6 +56,7 @@ var FirstPersonControls = function ( object, domElement ) {
 
 	this.startMouseX = 0;
 	this.startMouseY = 0;
+	this.nowTargetPosition = new Vector3();
 
 	// private variables
 
@@ -308,7 +309,7 @@ var FirstPersonControls = function ( object, domElement ) {
 			var position = this.object.position;
 
 			targetPosition.setFromSphericalCoords( 1, phi, theta ).add( position );
-
+			this.nowTargetPosition = targetPosition;
 			this.object.lookAt( targetPosition );
 
 		};
