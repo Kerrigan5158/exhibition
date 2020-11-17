@@ -28,7 +28,7 @@ module.exports = {
       {
         test: /\.(png|svg|jpg|gif)$/,
         use: [
-            'file-loader'
+            'url-loader?limit=99999999&name=[name].[ext]'
         ]
       }
     ]

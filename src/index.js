@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { FirstPersonControls } from 'three/examples/jsm/controls/FirstPersonControls.js';
+// import { FirstPersonControls } from 'three/examples/jsm/controls/FirstPersonControls.js';
+import { FirstPersonControls } from './helper/FirstPersonControls';
+import {CameraControls} from 'three/examples/jsm/controls/experimental/CameraControls';
 const ThreeBSP = require('three-js-csg')(THREE);
 import wall from './assets/wall.png';
 import top from './assets/top.jpg';
@@ -9,20 +11,24 @@ import floor from './assets/floor.jpg';
 import even from './assets/event.png';
 
 
-var scene,camera,webGLRenderer,controls,clock,e1,e2,mouse,raycaster;
+var scene,camera,webGLRenderer,controls,clock,e1,e2,mouse,raycaster,rootDom,rect;
+rootDom = document.getElementById('root');
+rect = rootDom.getBoundingClientRect();
+var images = [];
 function initScene(){
     scene = new THREE.Scene();
 }
 
 function initCamera(){
-    camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
-
+    camera = new THREE.PerspectiveCamera(60, rect.width / rect.height, 0.1, 1000);
+    
     camera.position.x = 50;
     camera.position.y = 10;
     camera.position.z = 0;
 
     let position = new THREE.Vector3(-1, 10, 0);
     camera.lookAt(position);
+    console.log(camera);
     camera.updateMatrixWorld();
     scene.add(camera);
 }
@@ -32,8 +38,9 @@ function initWebglRender(){
         antialias : true,
         alpha:true
     });
+
     webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
-    webGLRenderer.setSize(750, 750);
+    webGLRenderer.setSize(rect.width, rect.height);
     webGLRenderer.shadowMapEnabled = true;
 
     // add spotlight for the shadows
@@ -62,17 +69,17 @@ function initObjects(){
 
     paintWalls(102, 2, wallHeight, 100, 10, 0, 1/2, 0, 1/2,true);//右面墙
 
-    paintImg(10,0.2,10,1, 10, 30,1/2, 0,-1/2,true);//画
-    paintImg(10,0.2,10,1, 10, -30,1/2, 0,-1/2,true);//画
+    images[0] = paintImg(10,0.2,10,1, 10, 30,1/2, 0,-1/2,true,0,{x: 20,y: 10,z:-30});//画
+    images[1] = paintImg(10,0.2,10,1, 10, -30,1/2, 0,-1/2,true,1,{x: 20,y: 10,z:30});//画
 
-    paintImg(10,0.2,10,-50, 10, 49,0.5, 1, 0,true);//画
-    paintImg(10,0.2,10,50, 10, 49,0.5, 1, 0,true);//画
+    images[2] = paintImg(10,0.2,10,-50, 10, 49,0.5, 1, 0,true,2, {x: -50,y: 10,z:30});//画
+    images[3] = paintImg(10,0.2,10,50, 10, 49,0.5, 1, 0,true,3, {x: 50,y: 10,z:30});//画
 
-    paintImg(10,0.2,10,99, 10, 0,1/2, 0,1/2,true);//画
-    paintImg(10,0.2,10,-99, 10, 0,1/2, 0,-1/2,true);//画
+    images[4] = paintImg(10,0.2,10,99, 10, 0,1/2, 0,1/2,true,4, {x: 60,y: 10,z:0});//画
+    images[5] = paintImg(20,0.2,20,-99, 10, 0,1/2, 0,-1/2,true,5, {x: -60,y: 10,z:0});//画
 
-    paintImg(10,0.2,10,-50, 10, -49,-1/2, 0,null,true);//画
-    paintImg(10,0.2,10,50, 10, -49,-1/2, 0,null,true);//画
+    images[6] = paintImg(10,0.2,10,-50, 10, -49,-1/2, 0,null,true,6,{x: -50,y: 10,z:-30});//画
+    images[7] = paintImg(10,0.2,10,50, 10, -49,-1/2, 0,null,true,7,{x: -50,y: 10,z:-30});//画
 
     e1 = paintEvent(5,5,5,50,-2.5,0,0,0,0,true);
     e2 = paintEvent(5,5,5,-50,-2.5,0,0,0,0,true);
@@ -114,6 +121,7 @@ var paintFloor = function (){
         var mesh = new THREE.Mesh(gemotery,material);
         mesh.position.y = -5;
         mesh.rotation.x = Math.PI/2;
+        mesh.name = 'floor';
 
         scene.add(mesh);
     });
@@ -140,7 +148,7 @@ var paintTop = function (){
         var mesh = new THREE.Mesh(gemotery,material);
         mesh.position.y = 25;
         mesh.rotation.x = Math.PI/2;
-
+        mesh.name = 'top';
         scene.add(mesh);
     });
 }
@@ -164,12 +172,12 @@ var paintEvent = function(width, depth, height, x, y, z, rotationX, rotationY, r
     if(rotationZ){
         mesh.rotation.z = Math.PI * rotationZ;
     }
-
+    mesh.name = 'event';
     addmesh && scene.add(mesh);
     return mesh;
 }
 
-var paintImg = function(width, depth, height, x, y, z, rotationX, rotationY, rotationZ,addmesh){
+var paintImg = function(width, depth, height, x, y, z, rotationX, rotationY, rotationZ,addmesh,id,lookPosition){
     var texture = new THREE.TextureLoader().load(head);
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     var material = new THREE.MeshLambertMaterial({
@@ -188,7 +196,8 @@ var paintImg = function(width, depth, height, x, y, z, rotationX, rotationY, rot
     if(rotationZ){
         mesh.rotation.z = Math.PI * rotationZ;
     }
-
+    mesh.name = 'img'+id;
+    mesh.lookPosition = lookPosition;
     addmesh && scene.add(mesh);
     return mesh;
 }
@@ -213,7 +222,7 @@ var paintWalls = function (width, depth, height, x, y, z, rotationX, rotationY, 
     if(rotationZ){
         mesh.rotation.z = Math.PI * rotationZ;
     }
-
+    mesh.name = 'wall';
     addmesh && scene.add(mesh);
     return mesh;
 
@@ -245,6 +254,7 @@ var paintGlass = function (width, depth, height, x, y, z, rotationX, rotationY, 
     return mesh;
 }
 
+var lookPosition = {},dis={},obejctPosition;
 function render() {
     requestAnimationFrame(render);
     // y += 0.01;
@@ -252,6 +262,29 @@ function render() {
     // camera.lookAt(position);
     controls.update(clock.getDelta());
     //raycaster.setFromCamera( mouse, camera );
+    if (lookPosition && dis && (Math.abs(camera.position.x - lookPosition.x) > 1 || 
+    Math.abs(camera.position.y - lookPosition.y) > 1 || 
+    Math.abs(camera.position.z - lookPosition.z) > 1)) {
+        camera.position.x += dis.x;
+        camera.position.y += dis.y;
+        camera.position.z += dis.z;
+        let posi = new THREE.Vector3(obejctPosition.x,obejctPosition.y,obejctPosition.z);
+        camera.lookAt(posi);
+        // camera.updateMatrixWorld();
+    } else {
+        lookPosition = null;
+        dis.x = 0;
+        dis.y = 0;
+        dis.z = 0;
+        if (obejctPosition) {
+            let posi = new THREE.Vector3(obejctPosition.x,obejctPosition.y,obejctPosition.z);
+            camera.lookAt(posi);
+            obejctPosition = null;
+        }
+        
+    }
+    
+    
     webGLRenderer.render(scene, camera);
 }
 
@@ -264,16 +297,30 @@ function addEvent(){
 
         //将鼠标点击位置的屏幕坐标转换成threejs中的标准坐标
     
-        mouse.x = (event.clientX / 750) * 2 - 1;
-        mouse.y = (event.clientY/750) *2 + 1;
-
+        mouse.x = (event.clientX / rect.width) * 2 - 1;
+        mouse.y = -(event.clientY/rect.height) *2 + 1;
+        console.log(mouse);
         // 通过鼠标点的位置和当前相机的矩阵计算出raycaster
         raycaster.setFromCamera( mouse, camera );
     
         // 获取raycaster直线和所有模型相交的数组集合
-        var intersects = raycaster.intersectObjects(scene.children);
+        var intersects = raycaster.intersectObjects(images);
         console.log(intersects);
-    
+        if (intersects.length > 0) {
+            // camera.position.x = intersects[0].object.lookPosition.x;
+            // camera.position.y = intersects[0].object.lookPosition.y;
+            // camera.position.z = intersects[0].object.lookPosition.z;
+            dis.x = (intersects[0].object.lookPosition.x - camera.position.x) / 100;
+            dis.y = (intersects[0].object.lookPosition.y - camera.position.y) / 100;
+            dis.z = (intersects[0].object.lookPosition.z - camera.position.z) / 100;
+            lookPosition = intersects[0].object.lookPosition;
+            obejctPosition = intersects[0].object.position;
+            // camera.translateZ( - ( intersects[0].object.lookPosition.z- camera.position.z));
+            // let posi = new THREE.Vector3(intersects[0].object.position.x,intersects[0].object.position.y,intersects[0].object.position.z);
+            // camera.lookAt(posi);
+            // camera.updateMatrixWorld();
+        }
+        
         //将所有的相交的模型的颜色设置为红色
         // for ( var i = 0; i < intersects.length; i++ ) {
     
@@ -300,21 +347,28 @@ function init(){
     // orbit.addEventListener('change', render);
 
     controls = new FirstPersonControls(camera, webGLRenderer.domElement);
-    controls.activeLook = true;
+    controls.activeLook = false;
+    controls.movementSpeed = 1;
     controls.constrainVertical = true;
     controls.lookSpeed = 0.05; //鼠标移动查看的速度
-    controls.lookVertical = false;
-    controls.mouseDragOn = false;
+    controls.lookVertical = true;
+    controls.mouseDragOn = true;
     controls.dragToLook = true;
-    controls.movementSpeed = 5; //相机移动速度
+    controls.movementSpeed = 10; //相机移动速度
     controls.noFly = true;
-    controls.constrainVertical = true; //约束垂直
+    controls.constrainVertical = false; //约束垂直
     controls.verticalMin = 1.0;
     controls.verticalMax = 2.0;
     controls.lon = -100; //进入初始视角x轴的角度
     controls.lat = 0; //初始视角进入后y轴的角度
     clock = new THREE.Clock();
-    //addEvent();
+
+
+    // var cameraControl = new CameraControls(camera, webGLRenderer.domElement);
+    // cameraControl.target = new THREE.Vector3(50, 10, 0);
+    // cameraControl.rotateSpeed = 0.3;
+    // cameraControl.update();
+    addEvent();
     render();
 }
 //确保init方法在网页加载完毕后被调用
