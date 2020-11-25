@@ -4,7 +4,7 @@ const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 // const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
-  entry: path.join(__dirname, '/src/index.js'), // 入口文件
+  entry: path.join(__dirname, '/src/index2.js'), // 入口文件
   output: {
     path: path.join(__dirname, '/dist'), //打包后的文件存放的地方
     chunkFilename: '[name]_[chunkhash].min.js',
@@ -13,7 +13,8 @@ module.exports = {
   devServer: {
     contentBase: './dist', // 本地服务器所加载文件的目录
     inline: true, // 文件修改后实时刷新
-    historyApiFallback: true //不跳转
+    historyApiFallback: true, //不跳转
+    port: 8082
   },
   plugins: [
     new CleanWebpackPlugin(),

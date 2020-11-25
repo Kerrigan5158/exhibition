@@ -24,7 +24,7 @@ function initCamera(){
     camera = new THREE.PerspectiveCamera(60, rect.width / rect.height, 0.1, 1000);
     
     camera.position.x = 50;
-    camera.position.y = 10;
+    camera.position.y = 5;
     camera.position.z = 0;
 
     let position = new THREE.Vector3(-1, 10, 0);
@@ -69,21 +69,21 @@ function initObjects(){
 
     paintWalls(102, 2, wallHeight, 100, 10, 0, 1/2, 0, 1/2,true);//右面墙
 
-    images[0] = paintImg(10,0.2,10,1, 10, 30,1/2, 0,-1/2,true,0,{x: 20,y: 10,z:30});//画
-    images[1] = paintImg(10,0.2,10,1, 10, -30,1/2, 0,-1/2,true,1,{x: 20,y: 10,z:-30});//画
+    images[0] = paintImg(10,0.2,10,1, 10, 30,1/2, 0,-1/2,true,0,{x: 40,y: 5,z:30});//画
+    images[1] = paintImg(10,0.2,10,1, 10, -30,1/2, 0,-1/2,true,1,{x: 40,y: 5,z:-30});//画
 
-    images[2] = paintImg(10,0.2,10,-50, 10, 49,0.5, 1, 0,true,2, {x: -50,y: 10,z:30});//画
-    images[3] = paintImg(10,0.2,10,50, 10, 49,0.5, 1, 0,true,3, {x: 50,y: 10,z:30});//画
+    images[2] = paintImg(10,0.2,10,-50, 10, 49,0.5, 1, 0,true,2, {x: -50,y: 5,z:20});//画
+    images[3] = paintImg(10,0.2,10,50, 10, 49,0.5, 1, 0,true,3, {x: 50,y: 5,z:20});//画
 
-    images[4] = paintImg(10,0.2,10,99, 10, 0,1/2, 0,1/2,true,4, {x: 60,y: 10,z:0});//画
-    images[5] = paintImg(20,0.2,20,-99, 10, 0,1/2, 0,-1/2,true,5, {x: -60,y: 10,z:0});//画
+    images[4] = paintImg(10,0.2,10,99, 10, 0,1/2, 0,1/2,true,4, {x: 70,y: 5,z:0});//画
+    images[5] = paintImg(20,0.2,20,-99, 10, 0,1/2, 0,-1/2,true,5, {x: -70,y: 5,z:0});//画
 
-    images[6] = paintImg(10,0.2,10,-50, 10, -49,-1/2, 0,null,true,6,{x: -50,y: 10,z:-30});//画
-    images[7] = paintImg(10,0.2,10,50, 10, -49,-1/2, 0,null,true,7,{x: -50,y: 10,z:-30});//画
+    images[6] = paintImg(10,0.2,10,-50, 10, -49,-1/2, 0,null,true,6,{x: -50,y: 5,z:-20});//画
+    images[7] = paintImg(10,0.2,10,50, 10, -49,-1/2, 0,null,true,7,{x: -50,y: 5,z:-20});//画
 
 
-    images[8] = paintEvent(5,5,5,50,-2.5,0,0,0,0,true,0,{x:50,y:10,z:0},{x:99,y:10,z:0});
-    images[9] = paintEvent(5,5,5,-50,-2.5,0,0,0,0,true,1,{x:-50,y:10,z:0},{x:-99,y:10,z:0});
+    images[8] = paintEvent(5,5,5,0,-2.5,0,0,0,0,true,0,{x:0,y:5,z:0});
+    //images[9] = paintEvent(5,5,5,-50,-2.5,0,0,0,0,true,1,{x:-50,y:10,z:0},{x:-99,y:10,z:0});
 
 }
 
@@ -258,6 +258,7 @@ var paintGlass = function (width, depth, height, x, y, z, rotationX, rotationY, 
 }
 
 var lookPosition = {},dis={},obejctPosition, dis_look={},nowTargetPosition,jia=100;
+var isTrslatecamera = false;
 function render() {
     requestAnimationFrame(render);
     // y += 0.01;
@@ -310,16 +311,14 @@ function render() {
         camera.position.x += dis.x;
         camera.position.y += dis.y;
         camera.position.z += dis.z;
-        nowTargetPosition.x += dis_look.x;
-        nowTargetPosition.y += dis_look.y;
-        nowTargetPosition.z += dis_look.z;
+        // if (isTrslatecamera && jia > 79) {
+            nowTargetPosition.x += dis_look.x;
+            nowTargetPosition.y += dis_look.y;
+            nowTargetPosition.z += dis_look.z;
+            // controls.lookAt(nowTargetPosition);
+        // }
         controls.lookAt(nowTargetPosition);
-
-    } else {
-        
     }
-    
-    
     webGLRenderer.render(scene, camera);
 }
 
@@ -350,10 +349,21 @@ function addEvent(){
             dis.z = (intersects[0].object.lookPosition.z - camera.position.z) / 100;
             lookPosition = intersects[0].object.lookPosition;
             obejctPosition = intersects[0].object.targetPosition || intersects[0].object.position;
+            // nowTargetPosition = new THREE.Vector3();
+            // nowTargetPosition.x = controls.nowTargetPosition.x;
+            // nowTargetPosition.y = controls.nowTargetPosition.y;
+            // nowTargetPosition.z = controls.nowTargetPosition.z;
             nowTargetPosition = controls.nowTargetPosition;
             dis_look.x = (obejctPosition.x-nowTargetPosition.x) / 100;
             dis_look.y = (obejctPosition.y-nowTargetPosition.y) / 100;
             dis_look.z = (obejctPosition.z-nowTargetPosition.z) / 100;
+            isTrslatecamera = true;
+            if (intersects[0].object.name == 'event0') {
+                isTrslatecamera = false;
+                dis_look.x = 0;
+                dis_look.y = 0;
+                dis_look.z = 0;
+            }
             jia = 0;
             // console.log(nowTargetPosition);
             // console.log(obejctPosition);
