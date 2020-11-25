@@ -7,6 +7,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+import fb from './assets/test.fbx';
 
 var container, stats, controls, mixer;
 var camera, scene, renderer, light;
@@ -81,7 +82,7 @@ function init() {
     scene.add( axesHelper );
 
     var loader = new FBXLoader();
-    loader.load( './test.FBX', function ( object ) {
+    loader.load( fb, function ( object ) {
         console.log(object);
         object.scale.multiplyScalar(.1);
         // mixer = new THREE.AnimationMixer( object );
